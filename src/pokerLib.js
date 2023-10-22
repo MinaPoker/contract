@@ -98,3 +98,36 @@ function evaluateHand(hand) {
     const sortedCardValuesHighCard = sortedCardValues.reverse();
     return { strength: 1, type: 'High Card' };
 }
+
+
+// Compare two hands to find the winner
+function findWinner(player1Hand, player2Hand) {
+    const player1Strength = evaluateHand(player1Hand);
+    const player2Strength = evaluateHand(player2Hand);
+    console.log("player1Strength", player1Strength, "player2Strength", player2Strength);
+
+    if (player1Strength > player2Strength) {
+        return 'Player 1 wins!';
+    } else if (player1Strength < player2Strength) {
+        return 'Player 2 wins!';
+    } else {
+        // Compare individual card ranks starting from the highest
+
+        const player1CardValues = player1Hand.map(card => cardValues[card.value]);
+        const player2CardValues = player2Hand.map(card => cardValues[card.value]);
+
+        // Sort card values in descending order
+        player1CardValues.sort((a, b) => b - a);
+        player2CardValues.sort((a, b) => b - a);
+
+        for (let i = 0; i < player1CardValues.length; i++) {
+            if (player1CardValues[i] > player2CardValues[i]) {
+                return 'Player 1 wins!';
+            } else if (player1CardValues[i] < player2CardValues[i]) {
+                return 'Player 2 wins!';
+            }
+        }
+        // If all card values are equal, it's a tie
+        return 'Tie';
+    }
+}
