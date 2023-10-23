@@ -131,3 +131,51 @@ function findWinner(player1Hand, player2Hand) {
         return 'Tie';
     }
 }
+
+// Simulate a round of betting
+function bettingRound(players, currentBet) {
+    let activePlayers = players.filter(player => !player.isFolded);
+
+    for (let i = 0; i < activePlayers.length; i++) {
+        const currentPlayer = activePlayers[i];
+
+        // Simulate player actions (replace with your betting logic)
+        const action = simulatePlayerAction(currentPlayer);
+
+        if (action === 'fold') {
+            currentPlayer.isFolded = true;
+        } else if (action === 'bet') {
+            const betAmount = simulateBetAmount(currentPlayer);
+            if (betAmount > currentPlayer.chips) {
+                // Player doesn't have enough chips to bet, so they go all-in.
+                currentPlayer.currentBet += currentPlayer.chips;
+                currentPlayer.chips = 0;
+            } else {
+                currentPlayer.currentBet += betAmount;
+                currentPlayer.chips -= betAmount;
+            }
+        }
+
+        else if (action === 'call') {
+            const callAmount = currentBet - currentPlayer.currentBet;
+            if (callAmount > currentPlayer.chips) {
+                // Player doesn't have enough chips to call, so they go all-in.
+                currentPlayer.currentBet += currentPlayer.chips;
+                currentPlayer.chips = 0;
+            } else {
+                currentPlayer.currentBet += callAmount;
+                currentPlayer.chips -= callAmount;
+            }
+        } else if (action === 'raise') {
+            const raiseAmount = simulateRaiseAmount(currentPlayer);
+            if (raiseAmount > currentPlayer.chips) {
+                // Player doesn't have enough chips to raise, so they go all-in.
+                currentPlayer.currentBet += currentPlayer.chips;
+                currentPlayer.chips = 0;
+            } else {
+                currentPlayer.currentBet += raiseAmount;
+                currentPlayer.chips -= raiseAmount;
+            }
+        }
+    }
+}
