@@ -1,3 +1,4 @@
+export { deck, cardValues, evaluateHand, findWinner, bettingRound };
 
 // Initialize a standard deck of cards
 const suits = ["Hearts", "Diamonds", "Clubs", "Spades"];
