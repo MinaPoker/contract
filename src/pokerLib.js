@@ -179,3 +179,27 @@ function bettingRound(players, currentBet) {
         }
     }
 }
+
+
+// Simulated function for player actions
+function simulatePlayerAction(player) {
+    // Replace this with your own logic for player actions (fold, bet, call, raise)
+    const actions = ['fold', 'bet', 'call', 'raise'];
+    const randomAction = actions[Math.floor(Math.random() * actions.length)];
+    console.log("randomAction :", randomAction)
+    return randomAction;
+}
+
+// Simulated function for bet amount
+function simulateBetAmount(player) {
+    // Replace this with your own logic for determining bet amount
+    // For simplicity, I'm using a random amount between 1 and 50
+    return Math.floor(Math.random() * 50) + 1;
+}
+
+// Simulated function for raise amount
+function simulateRaiseAmount(player) {
+    // Replace this with your own logic for determining raise amount
+    // For simplicity, I'm using a random amount between 1 and 50
+    return Math.floor(Math.random() * 50) + 1;
+}
