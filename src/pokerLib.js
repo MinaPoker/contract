@@ -204,3 +204,94 @@ function simulateRaiseAmount(player) {
     // For simplicity, I'm using a random amount between 1 and 50
     return Math.floor(Math.random() * 50) + 1;
 }
+
+
+
+// *********************************************************************************************************************
+// Sample Poker Game
+
+// const player1Hand = [
+//     { suit: 'Hearts', value: 'A' },
+//     { suit: 'Clubs', value: 'A' },
+// ];
+
+// const player2Hand = [
+//     { suit: 'Hearts', value: 'A' },
+//     { suit: 'Hearts', value: 'K' },
+// ];
+
+// const player1Hand = [
+//     { suit: 'Hearts', value: '2' },
+//     { suit: 'Hearts', value: '3' },
+//     { suit: 'Hearts', value: '4' },
+//     { suit: 'Hearts', value: '5' },
+//     { suit: 'Clubs', value: '6' },
+// ];
+
+// const player2Hand = [
+//     { suit: 'Diamonds', value: '2' },
+//     { suit: 'Diamonds', value: '3' },
+//     { suit: 'Diamonds', value: '4' },
+//     { suit: 'Diamonds', value: '7' },
+//     { suit: 'Spades', value: '9' },
+// ];
+
+// const player1Hand = [
+//     { suit: 'Hearts', value: 'A' },
+//     { suit: 'Clubs', value: 'A' },
+// ];
+
+// const player2Hand = [
+//     { suit: 'Diamonds', value: '3' },
+//     { suit: 'Spades', value: '5' },
+// ];
+
+// const player1Hand = [
+//     { suit: 'Hearts', value: '3' },
+//     { suit: 'Clubs', value: '3' },
+//     { suit: 'Diamonds', value: '3' },
+//     { suit: 'Spades', value: '2' },
+//     { suit: 'Spades', value: '2' },
+// ];
+
+// const player2Hand = [
+//     { suit: 'Diamonds', value: '7' },
+//     { suit: 'Spades', value: '7' },
+//     { suit: 'Clubs', value: '7' },
+//     { suit: 'Hearts', value: '7' },
+//     { suit: 'Diamonds', value: '9' },
+// ];
+
+const player1Hand = [
+    { suit: 'Hearts', value: 'A' },
+];
+
+const player2Hand = [
+    { suit: 'Hearts', value: 'A' },
+    { suit: 'Clubs', value: 'A' },
+];
+
+// Reveal and evaluate the hands
+console.log('Player 1 hand:', player1Hand);
+console.log('Player 2 hand:', player2Hand);
+
+const winner = findWinner(player1Hand, player2Hand);
+console.log('Winner:', winner);
+
+
+function calculateHandStrength(handCard) {
+    const handStrength = evaluateHand(handCard);
+    console.log("handStrength", handStrength);
+    return handStrength;
+}
+
+const players = [
+    { name: 1, chips: 100, currentBet: 10, isFolded: false, handStrength: calculateHandStrength(player1Hand) },
+    { name: 2, chips: 100, currentBet: 20, isFolded: false, handStrength: calculateHandStrength(player2Hand) },
+];
+
+const currentBet = 10;
+bettingRound(players, currentBet);
+players.forEach(player => {
+    console.log(`${player.name} - Chips: ${player.chips}, Current Bet: ${player.currentBet}, Folded: ${player.isFolded}`);
+});
