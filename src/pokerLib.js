@@ -262,36 +262,39 @@ function simulateRaiseAmount(player) {
 //     { suit: 'Diamonds', value: '9' },
 // ];
 
-const player1Hand = [
-    { suit: 'Hearts', value: 'A' },
-];
 
-const player2Hand = [
-    { suit: 'Hearts', value: 'A' },
-    { suit: 'Clubs', value: 'A' },
-];
+// *********************************************************************************************************************
 
-// Reveal and evaluate the hands
-console.log('Player 1 hand:', player1Hand);
-console.log('Player 2 hand:', player2Hand);
+// const player1Hand = [
+//     { suit: 'Hearts', value: 'A' },
+// ];
 
-const winner = findWinner(player1Hand, player2Hand);
-console.log('Winner:', winner);
+// const player2Hand = [
+//     { suit: 'Hearts', value: 'A' },
+//     { suit: 'Clubs', value: 'A' },
+// ];
+
+// // Reveal and evaluate the hands
+// console.log('Player 1 hand:', player1Hand);
+// console.log('Player 2 hand:', player2Hand);
+
+// const winner = findWinner(player1Hand, player2Hand);
+// console.log('Winner:', winner);
 
 
-function calculateHandStrength(handCard) {
-    const handStrength = evaluateHand(handCard);
-    console.log("handStrength", handStrength);
-    return handStrength;
-}
+// function calculateHandStrength(handCard) {
+//     const handStrength = evaluateHand(handCard);
+//     console.log("handStrength", handStrength);
+//     return handStrength;
+// }
 
-const players = [
-    { name: 1, chips: 100, currentBet: 10, isFolded: false, handStrength: calculateHandStrength(player1Hand) },
-    { name: 2, chips: 100, currentBet: 20, isFolded: false, handStrength: calculateHandStrength(player2Hand) },
-];
+// const players = [
+//     { name: 1, chips: 100, currentBet: 10, isFolded: false, handStrength: calculateHandStrength(player1Hand) },
+//     { name: 2, chips: 100, currentBet: 20, isFolded: false, handStrength: calculateHandStrength(player2Hand) },
+// ];
 
-const currentBet = 10;
-bettingRound(players, currentBet);
-players.forEach(player => {
-    console.log(`${player.name} - Chips: ${player.chips}, Current Bet: ${player.currentBet}, Folded: ${player.isFolded}`);
-});
+// const currentBet = 10;
+// bettingRound(players, currentBet);
+// players.forEach(player => {
+//     console.log(`${player.name} - Chips: ${player.chips}, Current Bet: ${player.currentBet}, Folded: ${player.isFolded}`);
+// });
