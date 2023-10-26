@@ -47,13 +47,15 @@ function evaluateHand(hand) {
     }
 
     if (hasFlush && hasStraight) {
-        return { strength: 9, type: 'Straight Flush' };
+        console.log('Card Evaluation:', { strength: 9, type: 'Straight Flush' });
+        return 9;
     }
 
     // Check for four of a kind
     for (const value in valuesCount) {
         if (valuesCount[value] === 4) {
-            return { strength: 8, type: 'Four of a Kind' };
+            console.log('Card Evaluation:', { strength: 8, type: 'Four of a Kind' });
+            return 8;
         }
     }
 
@@ -69,35 +71,43 @@ function evaluateHand(hand) {
         }
     }
     if (hasThreeOfAKind && hasPair) {
-        return { strength: 7, type: 'Full House' };
+        console.log('Card Evaluation:', { strength: 7, type: 'Full House' });
+        return 7;
     }
 
     if (hasFlush) {
-        return { strength: 6, type: 'Flush' };
+        console.log('Card Evaluation:', { strength: 6, type: 'Flush' });
+        return 6;
     }
 
     if (hasStraight) {
-        return { strength: 5, type: 'Straight' };
+        console.log('Card Evaluation:', { strength: 5, type: 'Straight' });
+        return 5;
     }
 
     // Check for three of a kind
     if (hasThreeOfAKind) {
-        return { strength: 4, type: 'Three of a Kind' };
+        console.log('Card Evaluation:', { strength: 4, type: 'Three of a Kind' });
+        return 4;
     }
 
     // Check for two pair
     if (Object.values(valuesCount).filter(count => count === 2).length === 2) {
-        return { strength: 3, type: 'Two Pair' };
+        console.log('Card Evaluation:', { strength: 3, type: 'Two Pair' });
+        return 3;
     }
 
     // Check for one pair
     if (hasPair) {
-        return { strength: 2, type: 'One Pair' };
+        console.log('Card Evaluation:', { strength: 2, type: 'One Pair' });
+        return 2;
     }
 
     // High card
     const sortedCardValuesHighCard = sortedCardValues.reverse();
-    return { strength: 1, type: 'High Card' };
+    console.log('Card Evaluation:', { strength: 1, type: 'High Card' });
+    return 1;
+
 }
 
 
