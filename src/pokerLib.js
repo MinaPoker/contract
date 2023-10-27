@@ -118,9 +118,11 @@ function findWinner(player1Hand, player2Hand) {
     console.log("player1Strength", player1Strength, "player2Strength", player2Strength);
 
     if (player1Strength > player2Strength) {
-        return 'Player 1 wins!';
+        console.log('Player 1 wins!');
+        return 1;
     } else if (player1Strength < player2Strength) {
-        return 'Player 2 wins!';
+        console.log('Player 2 wins!');
+        return 2;
     } else {
         // Compare individual card ranks starting from the highest
 
@@ -133,13 +135,16 @@ function findWinner(player1Hand, player2Hand) {
 
         for (let i = 0; i < player1CardValues.length; i++) {
             if (player1CardValues[i] > player2CardValues[i]) {
-                return 'Player 1 wins!';
+                console.log('Player 1 wins!');
+                return 1;
             } else if (player1CardValues[i] < player2CardValues[i]) {
-                return 'Player 2 wins!';
+                console.log('Player 2 wins!');
+                return 2;
             }
         }
         // If all card values are equal, it's a tie
-        return 'Tie';
+        console.log('It\'s a tie!');
+        return 3;
     }
 }
 
