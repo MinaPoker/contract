@@ -17,12 +17,16 @@ export { PokerGame, cardOwnershipVerify };
 
 class Player extends Struct({
     publicKey: PublicKey,
-    handStrength: Field,
-    betAmount: Field,
-    isFolded: Bool,
     chips: Field,
     currentBet: Field,
-}) { }
+    isFolded: Bool,
+    handStrength: Field,
+    betAmount: Field,
+}) {
+    // assign() {
+    //     this.publicKey = this.songVotes.add(1)
+    // };
+}
 
 class cardOwnershipVerify extends Struct({
     publicKey: PublicKey,
@@ -40,30 +44,54 @@ class cardOwnershipVerify extends Struct({
 }
 
 class PokerGame extends SmartContract {
-    @state(Field) numPlayers = State<Field>();
+    // @state(Field) numPlayers = State<Field>();
     @state(Field) potAmount = State<Field>();
     @state(Field) winner = State<Field>();
 
+    @state(Bool) nextIsPlayer2 = State<Bool>();
+    // defaults to false, set to true when a player wins
+
+    @state(Bool) gameDone = State<Bool>();
+    // the two players who are allowed to play
+
     @state(Player)
-    players = State<Player[]>();
+    player1 = State<Player[]>();
+
+    @state(Player)
+    player2 = State<Player[]>();
+
+    // init() {
+    //     super.init();
+    //     this.gameDone.set(Bool(true));
+    //     this.player1.publicKey.set(PublicKey.empty());
+    //     this.player2.set(PublicKey.empty());
+    // }
+
+    @method assignPlayers(player1: Player, player2: Player) {
+        this.gameDone.assertEquals(Bool(true));
+
+        // set players
+        this.player1.set(player1);
+        this.player2.set(player2);
+    }
 
     @method
     bet(amount: Field) {
-        let player = this.getPlayerByAddress(this.publicKey);
-        player.betAmount.add(amount).setTo(player.betAmount);
-        this.potAmount.add(amount).setTo(this.potAmount);
+        let player = this.getPlayerByAddress(this.context.sender);
+        player.betAmount = player.betAmount.add(amount);
+        this.potAmount = this.potAmount.add(amount);
     }
 
     @method
     revealHand(hand: Card[]) {
-        let player = this.getPlayerByAddress(this.players);
+        let player = this.getPlayerByAddress(this.context.sender);
         player.hand = hand;
 
         // Additional logic for revealing hands and determining winners can be added here
 
         // For simplicity, let's assume the winner takes the entire pot
-        this.send({ to: this.sender, amount: this.potAmount });
-        this.potAmount.setTo(Field.from(0));
+        this.send({ to: this.context.sender, amount: this.potAmount });
+        this.potAmount = Field.from(0);
     }
 
     private getPlayerByAddress(address: Field): Player {
