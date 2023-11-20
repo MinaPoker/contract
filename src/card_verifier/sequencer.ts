@@ -61,3 +61,46 @@ class VotingPeriod extends Struct({
         end: UInt32,
     },
 }) { }
+
+class VoterData extends Struct({
+    publicKey: PublicKey,
+    weight: Field,
+}) {
+    hash(): Field {
+        return Poseidon.hash(this.publicKey.toFields().concat(this.weight));
+    }
+
+    toJSON() {
+        return {
+            publicKey: this.publicKey.toBase58(),
+            weight: this.weight.toString(),
+        };
+    }
+}
+
+type JSONVote = {
+    voter: string;
+    authorization: {
+        r: string;
+        s: string;
+    };
+    voterDataRoot: string;
+    yes: string;
+    no: string;
+    abstained: string;
+    proposalId: string;
+};
+
+function validateJSONVote(json: unknown): json is JSONVote {
+    // this is very sloppy
+    return (
+        typeof json === 'object' &&
+        json !== null &&
+        'voter' in json &&
+        'authorization' in json &&
+        'voterDataRoot' in json &&
+        'choice' in json &&
+        'proposalId' in json
+    );
+}
+
