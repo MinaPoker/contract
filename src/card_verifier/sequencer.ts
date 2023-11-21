@@ -62,7 +62,7 @@ class VotingPeriod extends Struct({
     },
 }) { }
 
-class VoterData extends Struct({
+class CardData extends Struct({
     publicKey: PublicKey,
     weight: Field,
 }) {
@@ -104,3 +104,82 @@ function validateJSONVote(json: unknown): json is JSONVote {
     );
 }
 
+
+class Vote extends Struct({
+    voter: PublicKey,
+    authorization: Signature,
+    voterDataRoot: Field,
+    proposalId: Field,
+    yes: Field,
+    no: Field,
+    abstained: Field,
+}) {
+    fromJSON(json: JSONVote): Vote {
+        return new Vote({
+            voter: PublicKey.fromBase58(json.voter),
+            authorization: Signature.fromJSON(json.authorization),
+            voterDataRoot: Field(this.voterDataRoot),
+            yes: Field(json.yes),
+            no: Field(json.no),
+            abstained: Field(json.abstained),
+            proposalId: Field(json.proposalId),
+        });
+    }
+
+    verifySignature(publicKey: PublicKey) {
+        return this.authorization.verify(publicKey, [
+            this.yes,
+            this.no,
+            this.abstained,
+            this.proposalId,
+            this.voterDataRoot,
+        ]);
+    }
+}
+
+// just a tiny helper function
+function MerkleMapExtended<
+    V extends {
+        hash(): Field;
+        toJSON(): any;
+    }
+>() {
+    let merkleMap = new MerkleMap();
+    let map = new Map<string, V>();
+
+    return {
+        get(key: Field): V {
+            return map.get(key.toString())!;
+        },
+        set(key: Field, value: V) {
+            map.set(key.toString(), value);
+            merkleMap.set(key, value.hash());
+        },
+        getRoot(): Field {
+            return merkleMap.getRoot();
+        },
+        getWitness(key: Field): MerkleMapWitness {
+            return merkleMap.getWitness(key);
+        },
+        flat() {
+            let leaves = [...map.keys()].map((key, i) => {
+                let entry = map.get(key)!;
+                return {
+                    i,
+                    key,
+                    data: { ...entry.toJSON(), hash: entry.hash().toString() },
+                };
+            });
+            return {
+                meta: {
+                    root: merkleMap.getRoot().toString(),
+                    height: merkleMap.tree.height.toString(),
+                    leafCount: merkleMap.tree.leafCount.toString(),
+                },
+                leaves,
+            };
+        },
+    };
+}
+
+const PORT = 3000;
