@@ -9,7 +9,7 @@ import {
     Poseidon,
     isReady,
     PrivateKey,
-} from 'snarkyjs';
+} from 'o1js';
 
 import express from 'express';
 
