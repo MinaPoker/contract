@@ -1,4 +1,4 @@
-import { Field, PublicKey, Poseidon, MerkleMap } from 'snarkyjs';
+import { Field, PublicKey, Poseidon, MerkleMap } from 'o1js';
 import { Vote } from './sequencer';
 
 export { Nullifier, calculateNullifierRootTransition, calculateVotes };
