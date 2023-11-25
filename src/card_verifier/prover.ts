@@ -6,7 +6,7 @@ import {
     Poseidon,
     Field,
     Bool,
-} from 'snarkyjs';
+} from 'o1js';
 
 import { StateTransition, Vote, MerkleMapExtended } from './sequencer.js';
 import { Nullifier } from './lib.js';
@@ -86,3 +86,4 @@ function Prover(
         },
     });
 }
+
