@@ -87,3 +87,48 @@ function Prover(
     });
 }
 
+
+function checkAndSetNullifier(
+    vote: Vote,
+    nullifierTree: MerkleMap,
+    nullifierRoot: Field
+) {
+    let expectedNullifier = Nullifier(vote.voter, vote.proposalId);
+
+    let nullifierWitness = Circuit.witness(MerkleMapWitness, () => {
+        return nullifierTree.getWitness(expectedNullifier);
+    });
+
+    let [root] = nullifierWitness.computeRootAndKey(Field(0));
+
+    // we expect that a 0 is set as position [expectedNullifier] (voter key and proposal id), so if it matches it means the nullifier hasn't been set yet
+    root.assertEquals(nullifierRoot, 'Nullifier already set!');
+
+    // set the nullifier to 1
+    let [newRoot] = nullifierWitness.computeRootAndKey(Field(1));
+
+    Circuit.asProver(() => {
+        nullifierTree.set(expectedNullifier, Field(1));
+    });
+
+    return newRoot;
+}
+
+function checkVoterEligibility(
+    vote: Vote,
+    voterData: ReturnType<typeof MerkleMapExtended>,
+    publicInput: StateTransition
+) {
+    let membershipProof = Circuit.witness(MerkleMapWitness, () => {
+        return voterData.getWitness(Poseidon.hash(vote.voter.toFields()));
+    });
+    let weight = Circuit.witness(Field, () => {
+        return (voterData.get(Poseidon.hash(vote.voter.toFields())) as any).weight;
+    });
+    let [root] = membershipProof.computeRootAndKey(
+        Poseidon.hash(vote.voter.toFields().concat(weight))
+    );
+    return root.equals(publicInput.voterDataRoot);
+}
+
+
