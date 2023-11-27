@@ -114,7 +114,7 @@ function checkAndSetNullifier(
     return newRoot;
 }
 
-function checkVoterEligibility(
+function checkUserEligibility(
     vote: Vote,
     voterData: ReturnType<typeof MerkleMapExtended>,
     publicInput: StateTransition
