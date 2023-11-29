@@ -12,16 +12,16 @@ import {
 
 // ============================================================================
 
-export const fieldToFlagPostsAsDeleted = Field(93137);
-export const fieldToFlagPostsAsRestored = Field(1010);
+export const fieldToFlagUsersAsDeleted = Field(93137);
+export const fieldToFlagUsersAsRestored = Field(1010);
 
 // ============================================================================
 
-export class PostState extends Struct({
+export class Userstate extends Struct({
     posterAddress: PublicKey,
     postContentID: CircuitString,
-    allPostsCounter: Field,
-    userPostsCounter: Field,
+    allUsersCounter: Field,
+    userUsersCounter: Field,
     postBlockHeight: Field,
     deletionBlockHeight: Field,
 }) {
@@ -31,8 +31,8 @@ export class PostState extends Struct({
                 .toFields()
                 .concat([
                     this.postContentID.hash(),
-                    this.allPostsCounter,
-                    this.userPostsCounter,
+                    this.allUsersCounter,
+                    this.userUsersCounter,
                     this.postBlockHeight,
                     this.deletionBlockHeight,
                 ])
@@ -42,199 +42,350 @@ export class PostState extends Struct({
 
 // ============================================================================
 
-export class PostsTransition extends Struct({
-    initialAllPostsCounter: Field,
-    latestAllPostsCounter: Field,
-    initialUsersPostsCounters: Field,
-    latestUsersPostsCounters: Field,
-    initialPosts: Field,
-    latestPosts: Field,
+export class UsersTransition extends Struct({
+    initialAllUsersCounter: Field,
+    latestAllUsersCounter: Field,
+    initialUsersUsersCounters: Field,
+    latestUsersUsersCounters: Field,
+    initialUsers: Field,
+    latestUsers: Field,
     blockHeight: Field,
 }) {
     static createPostPublishingTransition(
         signature: Signature,
-        initialAllPostsCounter: Field,
-        initialUsersPostsCounters: Field,
-        latestUsersPostsCounters: Field,
-        initialUserPostsCounter: Field,
-        userPostsCounterWitness: MerkleMapWitness,
-        initialPosts: Field,
-        latestPosts: Field,
-        postState: PostState,
+        initialAllUsersCounter: Field,
+        initialUsersUsersCounters: Field,
+        latestUsersUsersCounters: Field,
+        initialUserUsersCounter: Field,
+        userUsersCounterWitness: MerkleMapWitness,
+        initialUsers: Field,
+        latestUsers: Field,
+        Userstate: Userstate,
         postWitness: MerkleMapWitness
     ) {
-        initialAllPostsCounter.assertEquals(postState.allPostsCounter.sub(1));
-        postState.deletionBlockHeight.assertEquals(Field(0));
+        initialAllUsersCounter.assertEquals(Userstate.allUsersCounter.sub(1));
+        Userstate.deletionBlockHeight.assertEquals(Field(0));
 
-        const isSigned = signature.verify(postState.posterAddress, [
-            postState.postContentID.hash(),
+        const isSigned = signature.verify(Userstate.posterAddress, [
+            Userstate.postContentID.hash(),
         ]);
         isSigned.assertTrue();
 
-        const [usersPostsCountersBefore, userPostsCounterKey] =
-            userPostsCounterWitness.computeRootAndKey(initialUserPostsCounter);
-        usersPostsCountersBefore.assertEquals(initialUsersPostsCounters);
+        const [usersUsersCountersBefore, userUsersCounterKey] =
+            userUsersCounterWitness.computeRootAndKey(initialUserUsersCounter);
+        usersUsersCountersBefore.assertEquals(initialUsersUsersCounters);
         const posterAddressAsField = Poseidon.hash(
-            postState.posterAddress.toFields()
+            Userstate.posterAddress.toFields()
         );
-        userPostsCounterKey.assertEquals(posterAddressAsField);
-        initialUserPostsCounter.assertEquals(postState.userPostsCounter.sub(1));
+        userUsersCounterKey.assertEquals(posterAddressAsField);
+        initialUserUsersCounter.assertEquals(Userstate.userUsersCounter.sub(1));
 
-        const usersPostsCountersAfter = userPostsCounterWitness.computeRootAndKey(
-            postState.userPostsCounter
+        const usersUsersCountersAfter = userUsersCounterWitness.computeRootAndKey(
+            Userstate.userUsersCounter
         )[0];
-        usersPostsCountersAfter.assertEquals(latestUsersPostsCounters);
+        usersUsersCountersAfter.assertEquals(latestUsersUsersCounters);
 
-        const [postsBefore, postKey] = postWitness.computeRootAndKey(Field(0));
-        postsBefore.assertEquals(initialPosts);
+        const [UsersBefore, postKey] = postWitness.computeRootAndKey(Field(0));
+        UsersBefore.assertEquals(initialUsers);
         postKey.assertEquals(
-            Poseidon.hash([posterAddressAsField, postState.postContentID.hash()])
+            Poseidon.hash([posterAddressAsField, Userstate.postContentID.hash()])
         );
 
-        const postsAfter = postWitness.computeRootAndKey(postState.hash())[0];
-        postsAfter.assertEquals(latestPosts);
+        const UsersAfter = postWitness.computeRootAndKey(Userstate.hash())[0];
+        UsersAfter.assertEquals(latestUsers);
 
-        return new PostsTransition({
-            initialAllPostsCounter: initialAllPostsCounter,
-            latestAllPostsCounter: postState.allPostsCounter,
-            initialUsersPostsCounters: initialUsersPostsCounters,
-            latestUsersPostsCounters: usersPostsCountersAfter,
-            initialPosts: initialPosts,
-            latestPosts: postsAfter,
-            blockHeight: postState.postBlockHeight,
+        return new UsersTransition({
+            initialAllUsersCounter: initialAllUsersCounter,
+            latestAllUsersCounter: Userstate.allUsersCounter,
+            initialUsersUsersCounters: initialUsersUsersCounters,
+            latestUsersUsersCounters: usersUsersCountersAfter,
+            initialUsers: initialUsers,
+            latestUsers: UsersAfter,
+            blockHeight: Userstate.postBlockHeight,
         });
     }
 
     static assertEquals(
-        transition1: PostsTransition,
-        transition2: PostsTransition
+        transition1: UsersTransition,
+        transition2: UsersTransition
     ) {
-        transition1.initialAllPostsCounter.assertEquals(
-            transition2.initialAllPostsCounter
+        transition1.initialAllUsersCounter.assertEquals(
+            transition2.initialAllUsersCounter
         );
-        transition1.latestAllPostsCounter.assertEquals(
-            transition2.latestAllPostsCounter
+        transition1.latestAllUsersCounter.assertEquals(
+            transition2.latestAllUsersCounter
         );
-        transition1.initialUsersPostsCounters.assertEquals(
-            transition2.initialUsersPostsCounters
+        transition1.initialUsersUsersCounters.assertEquals(
+            transition2.initialUsersUsersCounters
         );
-        transition1.latestUsersPostsCounters.assertEquals(
-            transition2.latestUsersPostsCounters
+        transition1.latestUsersUsersCounters.assertEquals(
+            transition2.latestUsersUsersCounters
         );
-        transition1.initialPosts.assertEquals(transition2.initialPosts);
-        transition1.latestPosts.assertEquals(transition2.latestPosts);
+        transition1.initialUsers.assertEquals(transition2.initialUsers);
+        transition1.latestUsers.assertEquals(transition2.latestUsers);
         transition1.blockHeight.assertEquals(transition2.blockHeight);
     }
 
-    static mergePostsTransitions(
-        transition1: PostsTransition,
-        transition2: PostsTransition
+    static mergeUsersTransitions(
+        transition1: UsersTransition,
+        transition2: UsersTransition
     ) {
-        transition1.latestAllPostsCounter.assertEquals(
-            transition2.initialAllPostsCounter
+        transition1.latestAllUsersCounter.assertEquals(
+            transition2.initialAllUsersCounter
         );
-        transition1.latestUsersPostsCounters.assertEquals(
-            transition2.initialUsersPostsCounters
+        transition1.latestUsersUsersCounters.assertEquals(
+            transition2.initialUsersUsersCounters
         );
-        transition1.latestPosts.assertEquals(transition2.initialPosts);
+        transition1.latestUsers.assertEquals(transition2.initialUsers);
         transition1.blockHeight.assertEquals(transition2.blockHeight);
 
-        return new PostsTransition({
-            initialAllPostsCounter: transition1.initialAllPostsCounter,
-            latestAllPostsCounter: transition2.latestAllPostsCounter,
-            initialUsersPostsCounters: transition1.initialUsersPostsCounters,
-            latestUsersPostsCounters: transition2.latestUsersPostsCounters,
-            initialPosts: transition1.initialPosts,
-            latestPosts: transition2.latestPosts,
+        return new UsersTransition({
+            initialAllUsersCounter: transition1.initialAllUsersCounter,
+            latestAllUsersCounter: transition2.latestAllUsersCounter,
+            initialUsersUsersCounters: transition1.initialUsersUsersCounters,
+            latestUsersUsersCounters: transition2.latestUsersUsersCounters,
+            initialUsers: transition1.initialUsers,
+            latestUsers: transition2.latestUsers,
             blockHeight: transition1.blockHeight,
         });
     }
 
     static createPostDeletionTransition(
         signature: Signature,
-        allPostsCounter: Field,
-        usersPostsCounters: Field,
-        initialPosts: Field,
-        latestPosts: Field,
-        initialPostState: PostState,
+        allUsersCounter: Field,
+        usersUsersCounters: Field,
+        initialUsers: Field,
+        latestUsers: Field,
+        initialUserstate: Userstate,
         postWitness: MerkleMapWitness,
         blockHeight: Field
     ) {
-        initialPostState.deletionBlockHeight.assertEquals(Field(0));
-        const initialPostStateHash = initialPostState.hash();
-        const isSigned = signature.verify(initialPostState.posterAddress, [
-            initialPostStateHash,
-            fieldToFlagPostsAsDeleted,
+        initialUserstate.deletionBlockHeight.assertEquals(Field(0));
+        const initialUserstateHash = initialUserstate.hash();
+        const isSigned = signature.verify(initialUserstate.posterAddress, [
+            initialUserstateHash,
+            fieldToFlagUsersAsDeleted,
         ]);
         isSigned.assertTrue();
 
-        const postsBefore = postWitness.computeRootAndKey(initialPostStateHash)[0];
-        postsBefore.assertEquals(initialPosts);
+        const UsersBefore = postWitness.computeRootAndKey(initialUserstateHash)[0];
+        UsersBefore.assertEquals(initialUsers);
 
-        const latestPostState = new PostState({
-            posterAddress: initialPostState.posterAddress,
-            postContentID: initialPostState.postContentID,
-            allPostsCounter: initialPostState.allPostsCounter,
-            userPostsCounter: initialPostState.userPostsCounter,
-            postBlockHeight: initialPostState.postBlockHeight,
+        const latestUserstate = new Userstate({
+            posterAddress: initialUserstate.posterAddress,
+            postContentID: initialUserstate.postContentID,
+            allUsersCounter: initialUserstate.allUsersCounter,
+            userUsersCounter: initialUserstate.userUsersCounter,
+            postBlockHeight: initialUserstate.postBlockHeight,
             deletionBlockHeight: blockHeight,
         });
 
-        const postsAfter = postWitness.computeRootAndKey(latestPostState.hash())[0];
-        postsAfter.assertEquals(latestPosts);
+        const UsersAfter = postWitness.computeRootAndKey(latestUserstate.hash())[0];
+        UsersAfter.assertEquals(latestUsers);
 
-        return new PostsTransition({
-            initialAllPostsCounter: allPostsCounter,
-            latestAllPostsCounter: allPostsCounter,
-            initialUsersPostsCounters: usersPostsCounters,
-            latestUsersPostsCounters: usersPostsCounters,
-            initialPosts: initialPosts,
-            latestPosts: postsAfter,
+        return new UsersTransition({
+            initialAllUsersCounter: allUsersCounter,
+            latestAllUsersCounter: allUsersCounter,
+            initialUsersUsersCounters: usersUsersCounters,
+            latestUsersUsersCounters: usersUsersCounters,
+            initialUsers: initialUsers,
+            latestUsers: UsersAfter,
             blockHeight: blockHeight,
         });
     }
 
     static createPostRestorationTransition(
         signature: Signature,
-        allPostsCounter: Field,
-        usersPostsCounters: Field,
-        initialPosts: Field,
-        latestPosts: Field,
-        initialPostState: PostState,
+        allUsersCounter: Field,
+        usersUsersCounters: Field,
+        initialUsers: Field,
+        latestUsers: Field,
+        initialUserstate: Userstate,
         postWitness: MerkleMapWitness,
         blockHeight: Field
     ) {
-        initialPostState.deletionBlockHeight.assertNotEquals(0);
-        const initialPostStateHash = initialPostState.hash();
-        const isSigned = signature.verify(initialPostState.posterAddress, [
-            initialPostStateHash,
-            fieldToFlagPostsAsRestored,
+        initialUserstate.deletionBlockHeight.assertNotEquals(0);
+        const initialUserstateHash = initialUserstate.hash();
+        const isSigned = signature.verify(initialUserstate.posterAddress, [
+            initialUserstateHash,
+            fieldToFlagUsersAsRestored,
         ]);
         isSigned.assertTrue();
 
-        const postsBefore = postWitness.computeRootAndKey(initialPostStateHash)[0];
-        postsBefore.assertEquals(initialPosts);
+        const UsersBefore = postWitness.computeRootAndKey(initialUserstateHash)[0];
+        UsersBefore.assertEquals(initialUsers);
 
-        const latestPostState = new PostState({
-            posterAddress: initialPostState.posterAddress,
-            postContentID: initialPostState.postContentID,
-            allPostsCounter: initialPostState.allPostsCounter,
-            userPostsCounter: initialPostState.userPostsCounter,
-            postBlockHeight: initialPostState.postBlockHeight,
+        const latestUserstate = new Userstate({
+            posterAddress: initialUserstate.posterAddress,
+            postContentID: initialUserstate.postContentID,
+            allUsersCounter: initialUserstate.allUsersCounter,
+            userUsersCounter: initialUserstate.userUsersCounter,
+            postBlockHeight: initialUserstate.postBlockHeight,
             deletionBlockHeight: Field(0),
         });
 
-        const postsAfter = postWitness.computeRootAndKey(latestPostState.hash())[0];
-        postsAfter.assertEquals(latestPosts);
+        const UsersAfter = postWitness.computeRootAndKey(latestUserstate.hash())[0];
+        UsersAfter.assertEquals(latestUsers);
 
-        return new PostsTransition({
-            initialAllPostsCounter: allPostsCounter,
-            latestAllPostsCounter: allPostsCounter,
-            initialUsersPostsCounters: usersPostsCounters,
-            latestUsersPostsCounters: usersPostsCounters,
-            initialPosts: initialPosts,
-            latestPosts: postsAfter,
+        return new UsersTransition({
+            initialAllUsersCounter: allUsersCounter,
+            latestAllUsersCounter: allUsersCounter,
+            initialUsersUsersCounters: usersUsersCounters,
+            latestUsersUsersCounters: usersUsersCounters,
+            initialUsers: initialUsers,
+            latestUsers: UsersAfter,
             blockHeight: blockHeight,
         });
     }
 }
+
+
+export const Users = Experimental.ZkProgram({
+    publicInput: UsersTransition,
+
+    methods: {
+        provePostPublishingTransition: {
+            privateInputs: [
+                Signature,
+                Field,
+                Field,
+                Field,
+                Field,
+                MerkleMapWitness,
+                Field,
+                Field,
+                Userstate,
+                MerkleMapWitness,
+            ],
+
+            method(
+                transition: UsersTransition,
+                signature: Signature,
+                initialAllUsersCounter: Field,
+                initialUsersUsersCounters: Field,
+                latestUsersUsersCounters: Field,
+                initialUserUsersCounter: Field,
+                userUsersCounterWitness: MerkleMapWitness,
+                initialUsers: Field,
+                latestUsers: Field,
+                Userstate: Userstate,
+                postWitness: MerkleMapWitness
+            ) {
+                const computedTransition =
+                    UsersTransition.createPostPublishingTransition(
+                        signature,
+                        initialAllUsersCounter,
+                        initialUsersUsersCounters,
+                        latestUsersUsersCounters,
+                        initialUserUsersCounter,
+                        userUsersCounterWitness,
+                        initialUsers,
+                        latestUsers,
+                        Userstate,
+                        postWitness
+                    );
+                UsersTransition.assertEquals(computedTransition, transition);
+            },
+        },
+
+        provePostDeletionTransition: {
+            privateInputs: [
+                Signature,
+                Field,
+                Field,
+                Field,
+                Field,
+                Userstate,
+                MerkleMapWitness,
+                Field,
+            ],
+
+            method(
+                transition: UsersTransition,
+                signature: Signature,
+                allUsersCounter: Field,
+                usersUsersCounters: Field,
+                initialUsers: Field,
+                latestUsers: Field,
+                initialUserstate: Userstate,
+                postWitness: MerkleMapWitness,
+                blockHeight: Field
+            ) {
+                const computedTransition = UsersTransition.createPostDeletionTransition(
+                    signature,
+                    allUsersCounter,
+                    usersUsersCounters,
+                    initialUsers,
+                    latestUsers,
+                    initialUserstate,
+                    postWitness,
+                    blockHeight
+                );
+                UsersTransition.assertEquals(computedTransition, transition);
+            },
+        },
+
+        proveMergedUsersTransitions: {
+            privateInputs: [SelfProof, SelfProof],
+
+            method(
+                mergedPostTransitions: UsersTransition,
+                UsersDeletion1Proof: SelfProof<UsersTransition, undefined>,
+                UsersDeletion2Proof: SelfProof<UsersTransition, undefined>
+            ) {
+                UsersDeletion1Proof.verify();
+                UsersDeletion2Proof.verify();
+
+                const computedTransition = UsersTransition.mergeUsersTransitions(
+                    UsersDeletion1Proof.publicInput,
+                    UsersDeletion2Proof.publicInput
+                );
+                UsersTransition.assertEquals(computedTransition, mergedPostTransitions);
+            },
+        },
+
+        provePostRestorationTransition: {
+            privateInputs: [
+                Signature,
+                Field,
+                Field,
+                Field,
+                Field,
+                Userstate,
+                MerkleMapWitness,
+                Field,
+            ],
+
+            method(
+                transition: UsersTransition,
+                signature: Signature,
+                allUsersCounter: Field,
+                usersUsersCounters: Field,
+                initialUsers: Field,
+                latestUsers: Field,
+                initialUserstate: Userstate,
+                postWitness: MerkleMapWitness,
+                blockHeight: Field
+            ) {
+                const computedTransition =
+                    UsersTransition.createPostRestorationTransition(
+                        signature,
+                        allUsersCounter,
+                        usersUsersCounters,
+                        initialUsers,
+                        latestUsers,
+                        initialUserstate,
+                        postWitness,
+                        blockHeight
+                    );
+                UsersTransition.assertEquals(computedTransition, transition);
+            },
+        },
+    },
+});
+
+export let UsersProof_ = Experimental.ZkProgram.Proof(Users);
+export class UsersProof extends UsersProof_ { }
+
+// ============================================================================
+
