@@ -51,57 +51,36 @@ export class UsersTransition extends Struct({
     latestUsers: Field,
     blockHeight: Field,
 }) {
-    static createPostPublishingTransition(
+    static createUserCardTransition(
         signature: Signature,
-        initialAllUsersCounter: Field,
-        initialUsersUsersCounters: Field,
-        latestUsersUsersCounters: Field,
-        initialUserUsersCounter: Field,
-        userUsersCounterWitness: MerkleMapWitness,
-        initialUsers: Field,
-        latestUsers: Field,
-        Userstate: Userstate,
-        postWitness: MerkleMapWitness
+        userId: Field,
+        userName: Field,
+        userDescription: Field,
+        userWitness: MerkleMapWitness,
+        currentBlockHeight: Field,
     ) {
-        initialAllUsersCounter.assertEquals(Userstate.allUsersCounter.sub(1));
-        Userstate.deletionBlockHeight.assertEquals(Field(0));
-
-        const isSigned = signature.verify(Userstate.posterAddress, [
-            Userstate.postContentID.hash(),
-        ]);
+        const isSigned = signature.verify(/* Add necessary parameters */);
         isSigned.assertTrue();
 
-        const [usersUsersCountersBefore, userUsersCounterKey] =
-            userUsersCounterWitness.computeRootAndKey(initialUserUsersCounter);
-        usersUsersCountersBefore.assertEquals(initialUsersUsersCounters);
-        const posterAddressAsField = Poseidon.hash(
-            Userstate.posterAddress.toFields()
-        );
-        userUsersCounterKey.assertEquals(posterAddressAsField);
-        initialUserUsersCounter.assertEquals(Userstate.userUsersCounter.sub(1));
+        const [userCardBefore, userKey] = userWitness.computeRootAndKey(userId);
 
-        const usersUsersCountersAfter = userUsersCounterWitness.computeRootAndKey(
-            Userstate.userUsersCounter
-        )[0];
-        usersUsersCountersAfter.assertEquals(latestUsersUsersCounters);
+        // Create the updated user card
+        const userCardAfter = new UserCardTransition({
+            userId,
+            userName,
+            userDescription,
+            blockHeight: currentBlockHeight,
+        });
 
-        const [UsersBefore, postKey] = postWitness.computeRootAndKey(Field(0));
-        UsersBefore.assertEquals(initialUsers);
-        postKey.assertEquals(
-            Poseidon.hash([posterAddressAsField, Userstate.postContentID.hash()])
-        );
+        // Assuming userWitness.computeRootAndKey is used to get the updated root
+        const userCardRootAfter = userWitness.computeRootAndKey(userCardAfter.userId)[0];
 
-        const UsersAfter = postWitness.computeRootAndKey(Userstate.hash())[0];
-        UsersAfter.assertEquals(latestUsers);
-
-        return new UsersTransition({
-            initialAllUsersCounter: initialAllUsersCounter,
-            latestAllUsersCounter: Userstate.allUsersCounter,
-            initialUsersUsersCounters: initialUsersUsersCounters,
-            latestUsersUsersCounters: usersUsersCountersAfter,
-            initialUsers: initialUsers,
-            latestUsers: UsersAfter,
-            blockHeight: Userstate.postBlockHeight,
+        // Return the user card transition
+        return new UserCardTransition({
+            userId,
+            userName,
+            userDescription,
+            blockHeight: currentBlockHeight,
         });
     }
 
