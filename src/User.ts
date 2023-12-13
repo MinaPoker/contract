@@ -216,6 +216,47 @@ export class UsersTransition extends Struct({
             blockHeight: blockHeight,
         });
     }
+
+    static createUserCardRestoration(
+        signature: Signature,
+        userId: Field,
+        userName: Field,
+        userDescription: Field,
+        userWitness: MerkleMapWitness,
+        currentBlockHeight: Field,
+    ) {
+        // Validate signature or any other necessary checks
+        const isSigned = signature.verify(initialUserstate.posterAddress, [
+            initialUserstateHash,
+            fieldToFlagUsersAsRestored,
+        ]);
+        isSigned.assertTrue();
+
+
+        // Assuming userWitness.computeRootAndKey is used to get the root and key
+        const [userCardBefore, userKey] = userWitness.computeRootAndKey(userId);
+
+        // Create the restored user card
+        const userCardRestored = new UserCardRestoration({
+            userId,
+            userName,
+            userDescription,
+            // Set other fields as needed
+            // ...
+            blockHeight: currentBlockHeight,
+        });
+
+        // Assuming userWitness.computeRootAndKey is used to get the updated root
+        const userCardRootRestored = userWitness.computeRootAndKey(userCardRestored.userId)[0];
+
+        // Return the restored user card
+        return new UserCardRestoration({
+            userId,
+            userName,
+            userDescription,
+            blockHeight: currentBlockHeight,
+        });
+    }
 }
 
 
