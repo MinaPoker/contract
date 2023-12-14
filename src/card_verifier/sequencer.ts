@@ -21,21 +21,26 @@ export {
     VotingPeriod,
     Voting,
     MerkleMapExtended,
+    UserCard,
+    UserCardTransition,
 };
 
-//await isReady;
+// Ensure the o1js library is ready before proceeding
+// await isReady;
 
+// Definition of a Proposal
 class Proposal extends Struct({
     title: String,
     id: Field,
-    // we can add as many or as less options as we want
+    // Options for voting
     yes: Field,
     no: Field,
     abstained: Field,
 }) { }
 
+// Definition of a State Transition
 class StateTransition extends Struct({
-    CardDataRoot: Field, // this never changes
+    CardDataRoot: Field, // The root of the CardData Merkle Tree, which never changes
     nullifier: {
         before: Field,
         after: Field,
@@ -51,6 +56,7 @@ class StateTransition extends Struct({
     },
 }) { }
 
+// Definition of a Voting Period
 class VotingPeriod extends Struct({
     electionPeriod: {
         start: UInt32,
@@ -62,14 +68,17 @@ class VotingPeriod extends Struct({
     },
 }) { }
 
+// Definition of CardData
 class CardData extends Struct({
     publicKey: PublicKey,
     weight: Field,
 }) {
+    // Calculate the hash of CardData
     hash(): Field {
         return Poseidon.hash(this.publicKey.toFields().concat(this.weight));
     }
 
+    // Convert CardData to JSON format
     toJSON() {
         return {
             publicKey: this.publicKey.toBase58(),
@@ -78,6 +87,73 @@ class CardData extends Struct({
     }
 }
 
+// Definition of UserCard
+class UserCard extends Struct({
+    userId: Field,
+    userName: Field,
+    // Add other fields as needed
+    // ...
+}) {
+    // Calculate the hash of UserCard
+    hash(): Field {
+        return Poseidon.hash(this.userId, this.userName);
+    }
+
+    // Convert UserCard to JSON format
+    toJSON() {
+        return {
+            userId: this.userId.toString(),
+            userName: this.userName.toString(),
+            // Add other fields as needed
+            // ...
+        };
+    }
+}
+
+// Definition of UserCardTransition
+class UserCardTransition extends Struct({
+    userId: Field,
+    userName: Field,
+    // Add other fields as needed
+    // ...
+    blockHeight: Field,
+}) {
+    static createUserCardTransition(
+        userId: Field,
+        userName: Field,
+        // Add other parameters as needed
+        // ...
+        userWitness: MerkleMapWitness,
+        currentBlockHeight: Field,
+    ) {
+        // Assuming userWitness.computeRootAndKey is used to get the root and key
+        const [userCardBefore, userKey] = userWitness.computeRootAndKey(userId);
+        // Add any necessary assertions or validations
+
+        // Create the updated user card
+        const userCardAfter = new UserCardTransition({
+            userId,
+            userName,
+            // Set other fields as needed
+            // ...
+            blockHeight: currentBlockHeight,
+        });
+
+        // Assuming userWitness.computeRootAndKey is used to get the updated root
+        const userCardRootAfter = userWitness.computeRootAndKey(userCardAfter.userId)[0];
+
+        // Return the user card transition
+        return new UserCardTransition({
+            userId,
+            userName,
+            // Set other fields as needed
+            // ...
+            blockHeight: currentBlockHeight,
+        });
+    }
+}
+
+// Definition of JSONVote
 type JSONVote = {
     voter: string;
     authorization: {
@@ -103,7 +179,6 @@ function validateJSONVote(json: unknown): json is JSONVote {
         'proposalId' in json
     );
 }
-
 
 class Vote extends Struct({
     voter: PublicKey,

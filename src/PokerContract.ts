@@ -24,7 +24,7 @@ class Player extends Struct({
     betAmount: Field,
 }) {
     // assign() {
-    //     this.publicKey = this.songVotes.add(1)
+    //     this.publicKey = this.userVotes.add(1)
     // };
 }
 
