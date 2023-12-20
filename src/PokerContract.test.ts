@@ -1,4 +1,4 @@
-import { PokerGame } from './PokerContract';
+import { PokerGame, cardOwnershipVerify } from './PokerContract';
 import {
     Field,
     Bool,
@@ -88,6 +88,22 @@ describe('poker', () => {
         const board = zkApp.board.get();
         expect(board).toEqual(Field(0));
     });
+
+    it('should allow players to bet', async () => {
+        const zkApp = new PokerGame(zkAppAddress);
+        const txn = await Mina.transaction(player1Add, () => {
+            AccountUpdate.fundNewAccount(player1Add);
+            zkApp.deploy();
+            zkApp.startGame(player1Add, player2Add);
+            zkApp.bet(Field.from(10));
+        });
+        await txn.prove();
+        await txn.sign([zkAppPrivateKey, player1Key]).send();
+
+        const player1 = await zkApp.getPlayerByAddress(player1Add);
+        expect(player1.betAmount).toEqual(Field.from(10));
+    });
+
 
 
     // it('generates and deploys tictactoe', async () => {
