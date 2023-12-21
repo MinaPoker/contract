@@ -106,6 +106,31 @@ describe('poker', () => {
 
 
 
+    it('should reveal hands and determine winners', async () => {
+        const zkApp = new PokerGame(zkAppAddress);
+
+        const hand: Card[] = [
+            { suit: 'Hearts', value: 'A' },
+            { suit: 'Hearts', value: 'K' },
+            // Add more cards based on your game rules
+        ];
+
+        const txn = await Mina.transaction(player1Add, () => {
+            AccountUpdate.fundNewAccount(player1Add);
+            zkApp.deploy();
+            zkApp.startGame(player1Add, player2Add);
+            zkApp.bet(Field.from(10));
+            zkApp.revealHand(hand);
+        });
+        await txn.prove();
+        await txn.sign([zkAppPrivateKey, player1Key]).send();
+
+        const winner = zkApp.winner.get();
+        expect(winner).toEqual(player1Add);
+    });
+
+
+
     // it('generates and deploys tictactoe', async () => {
     //     const zkApp = new PokerGame(zkAppAddress);
     //     const txn = await Mina.transaction(player1Add, () => {
