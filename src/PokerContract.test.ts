@@ -129,6 +129,22 @@ describe('poker', () => {
         expect(winner).toEqual(player1Add);
     });
 
+    it('should handle folding', async () => {
+        const zkApp = new PokerGame(zkAppAddress);
+        const txn = await Mina.transaction(player1Add, () => {
+            AccountUpdate.fundNewAccount(player1Add);
+            zkApp.deploy();
+            zkApp.startGame(player1Add, player2Add);
+            zkApp.fold();
+        });
+        await txn.prove();
+        await txn.sign([zkAppPrivateKey, player1Key]).send();
+
+        const player1 = await zkApp.getPlayerByAddress(player1Add);
+        expect(player1.isFolded).toEqual(Bool(true));
+    });
+
+
 
 
     // it('generates and deploys tictactoe', async () => {
