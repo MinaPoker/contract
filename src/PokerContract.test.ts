@@ -144,7 +144,24 @@ describe('poker', () => {
         expect(player1.isFolded).toEqual(Bool(true));
     });
 
+    it('should determine the correct winner', async () => {
+        const zkApp = new PokerGame(zkAppAddress);
+        const txn = await Mina.transaction(player1Add, () => {
+            AccountUpdate.fundNewAccount(player1Add);
+            zkApp.deploy();
+            zkApp.startGame(player1Add, player2Add);
+            zkApp.bet(Field.from(10));
+            zkApp.bet(Field.from(20));
+            // Add logic for revealing hands
+            // ...
+        });
+        await txn.prove();
+        await txn.sign([zkAppPrivateKey, player1Key]).send();
 
+        const winner = zkApp.winner.get();
+        // Assert the correct winner based on your game logic
+        // ...
+    });
 
 
     // it('generates and deploys tictactoe', async () => {
