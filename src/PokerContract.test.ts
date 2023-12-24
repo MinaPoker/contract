@@ -152,14 +152,31 @@ describe('poker', () => {
             zkApp.startGame(player1Add, player2Add);
             zkApp.bet(Field.from(10));
             zkApp.bet(Field.from(20));
-            // Add logic for revealing hands
-            // ...
         });
         await txn.prove();
         await txn.sign([zkAppPrivateKey, player1Key]).send();
 
         const winner = zkApp.winner.get();
         // Assert the correct winner based on your game logic
+    });
+
+    it('should handle multiple rounds of betting', async () => {
+        const zkApp = new PokerGame(zkAppAddress);
+        const txn = await Mina.transaction(player1Add, () => {
+            AccountUpdate.fundNewAccount(player1Add);
+            zkApp.deploy();
+            zkApp.startGame(player1Add, player2Add);
+            zkApp.bet(Field.from(10));
+            zkApp.bet(Field.from(20));
+            zkApp.raise(Field.from(30));
+            zkApp.call();
+            // Add more rounds or actions based on your game logic
+            // ...
+        });
+        await txn.prove();
+        await txn.sign([zkAppPrivateKey, player1Key]).send();
+
+        // Add assertions based on the state after multiple rounds
         // ...
     });
 
