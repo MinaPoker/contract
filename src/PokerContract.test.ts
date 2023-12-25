@@ -170,16 +170,30 @@ describe('poker', () => {
             zkApp.bet(Field.from(20));
             zkApp.raise(Field.from(30));
             zkApp.call();
-            // Add more rounds or actions based on your game logic
+        });
+        await txn.prove();
+        await txn.sign([zkAppPrivateKey, player1Key]).send();
+
+    });
+
+    it('should handle ties and split the pot', async () => {
+        const zkApp = new PokerGame(zkAppAddress);
+        const txn = await Mina.transaction(player1Add, () => {
+            AccountUpdate.fundNewAccount(player1Add);
+            zkApp.deploy();
+            zkApp.startGame(player1Add, player2Add);
+            zkApp.bet(Field.from(10));
+            zkApp.bet(Field.from(10)); // Player 2 bets the same amount
+            // Add logic for revealing hands leading to a tie
             // ...
         });
         await txn.prove();
         await txn.sign([zkAppPrivateKey, player1Key]).send();
 
-        // Add assertions based on the state after multiple rounds
-        // ...
+        const potAmount = zkApp.potAmount.get();
+        // Assert that the pot is split between players
+        expect(potAmount).toEqual(Field.from(20));
     });
-
 
     // it('generates and deploys tictactoe', async () => {
     //     const zkApp = new PokerGame(zkAppAddress);
